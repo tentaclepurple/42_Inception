@@ -1,21 +1,19 @@
 version: '3'
 
 services:
-
   mariadb:
     container_name: mariadb
     build: ./requirements/mariadb/.
     image: mariadb
     restart: always
-    ports:
-      - "3306:3306"
+    expose:
+      - 3306
     volumes:
      - DB_Volume:/var/lib/mysql
     networks:
       - DockerNet
     env_file:
       - .env
-
   wordpress:
     container_name: wordpress
     depends_on:
@@ -31,7 +29,6 @@ services:
       - DockerNet
     env_file:
       - .env
-
   nginx:
     container_name: nginx
     depends_on:
@@ -45,65 +42,6 @@ services:
       - WP_Volume:/var/www/html
     networks:
       - DockerNet
-
-  redis:
-    container_name: redis
-    build: ./requirements/bonus/redis
-    depends_on:
-      - wordpress
-    ports:
-     - '6379:80'
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - WP_Volume:/var/lib/redis
-    networks:
-      - DockerNet
-
-  adminer:
-    container_name: adminer
-    image: adminer
-    depends_on:
-      - mariadb
-    ports:
-      - "8080:8080"
-    restart: always
-    networks:
-      - DockerNet
-    environment:
-      ADMINER_DEFAULT_SERVER: mariadb
-
-  py:
-    container_name: py
-    build: ./requirements/bonus/py
-    #restart: unless-stopped
-
-  web:
-    build: ./requirements/bonus/web
-    container_name: web
-    ports:
-      - "1024:80"
-    restart: unless-stopped
-  
-  ftp:
-    container_name: ftp
-    build: ./requirements/bonus/ftp/.
-    image: ftp
-    depends_on:
-      - wordpress
-    volumes:
-      - WP_Volume:/home/imontero/ftp/files
-    env_file:
-      - .env
-    ports:
-      - "21:21"
-      - "20:20"
-      - "40000-40005:40000-40005"
-    networks:
-      - DockerNet
-    restart: always
-
 volumes:
   WP_Volume:
     driver: local
@@ -117,8 +55,6 @@ volumes:
       type: volume
       device: /home/imontero/data/mariadb
       o: bind
-
 networks:
   DockerNet:
     driver: bridge
-
